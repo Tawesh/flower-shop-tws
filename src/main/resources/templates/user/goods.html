@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="stylesheet" href="/static/public/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/public/bootstrap/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/public/css/element-ui.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/static/user/css/default.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/user/css/component.css"/>
+    <link rel="icon" href="/favicon.ico">
+    <script src="/static/user/js/modernizr.custom.js"></script>
+    <script src="/static/public/js/vue.js"></script>
+    <script src="/static/public/js/element-ui.js"></script>
+    <script src="/static/public/js/jquery.main.js"></script>
+    <script src="/static/public/bootstrap/js/bootstrap.js"></script>
+    <script src="/static/public/js/axios.js"></script>
+    <title>更多鲜花</title>
+</head>
+<body>
+<div id="app">
+    <div style="position: fixed;width: 100%;z-index: 999;">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03"
+                    aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/">OnlineShop</a>
+
+            <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+                <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/"><i class="bi bi-house"></i>首页<span
+                                class="sr-only">(current)</span></a>
+                    </li>
+                </ul>
+                <div class="form-inline my-2 my-lg-0">
+                    <ul class="navbar-nav mr-auto" style="position:relative;right: 50px">
+                        <li class="nav-item">
+                            <el-button v-show="toLog" type="text" @click="toLogin">您好！请登录</el-button>
+                            <el-dropdown v-show="user" @command="toUserCenter">
+                    <span class="el-dropdown-link" style="cursor: pointer">
+                        {{uName}}<i class="el-icon-s-unfold el-icon--right" style="font-size: 15px"></i>
+                    </span>
+                                <el-dropdown-menu slot="dropdown">
+                                    <el-dropdown-item command="center"><i class="bi bi-people"></i>个人中心
+                                    </el-dropdown-item>
+                                    <el-dropdown-item command="myCart"><i class="bi bi-cart3"></i>购物车
+                                    </el-dropdown-item>
+                                    <el-dropdown-item command="logout"><i class="bi bi-escape"></i>注销
+                                    </el-dropdown-item>
+                                </el-dropdown-menu>
+                            </el-dropdown>
+                        </li>
+                    </ul>
+                    <input v-model="keyWords" class="form-control mr-sm-2" type="search" placeholder="关键词"
+                           aria-label="Search">
+                    <button type="button" @click="userSearch" class="btn btn-outline-success my-2 my-sm-0"><i
+                            class="bi bi-search"></i>搜索
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+
+    <div class="container" style="position: relative;top: 100px">
+        <div class="main">
+            <div id="cbp-vm" class="cbp-vm-switcher cbp-vm-view-grid infinite-list-wrapper" style="overflow:auto">
+                <div class="cbp-vm-options">
+                </div>
+                <ul>
+                    <li v-for="item in flowerList">
+                        <a class="cbp-vm-image"><img :src="'http://localhost:5200'+item.imgUrl" alt=""></a>
+                        <p class="cbp-vm-title" style="white-space: normal;font-size: 20px;height: 50px">
+                            {{item.title}}</p>
+                        <div class="cbp-vm-price"><span style="color: red">{{item.price}}</span>￥</div>
+                        <div class="cbp-vm-details" style="white-space: normal;">
+                            {{item.introduce}}
+                        </div>
+                        <a class="cbp-vm-add" style="cursor: pointer"
+                           @click="toBuy(item.id)"><i class="bi bi-list"></i>详情</a>
+                    </li>
+                </ul>
+                <div style="margin: auto;text-align: center">
+                    <el-button @click="load" v-show="loadMoreBtn">加载更多</el-button>
+                </div>
+                <div v-show="showMessage" style="margin: auto;text-align: center">
+                    <h1>暂无该商品，换个关键词试试吧！</h1>
+                </div>
+                <div style="margin: auto;text-align: center">
+                    <p v-if="loading">
+                        <img src="/static/public/image/loading.gif" alt=""><br>
+                        加载中...</p>
+                    <p v-if="noMore">没有更多了</p>
+                </div>
+                <el-backtop :bottom="100">
+                    <svg t="1698570795425" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                         xmlns="http://www.w3.org/2000/svg" p-id="5655" width="48" height="48">
+                        <path d="M920.663 472l-84.852 84.852-408.35-408.35 84.852-84.852z" fill="#006EFF"
+                              p-id="5656"></path>
+                        <path d="M187.575 558.52l-84.852-84.852L512.7 63.692l84.852 84.852z" fill="#006EFF"
+                              p-id="5657"></path>
+                        <path d="M571.633 958.873h-120v-764.2h120z" fill="#006EFF" p-id="5658"></path>
+                    </svg>
+                </el-backtop>
+            </div>
+        </div><!-- /main -->
+    </div><!-- /container -->
+</div>
+
+
+<link href="/static/public/css/element-ui.css" type="text/css" rel="stylesheet">
+<script src="/static/public/js/vue.js"></script>
+<script src="/static/public/js/axios.js"></script>
+<script src="/static/public/js/element-ui.js"></script>
+<script src="/static/user/js/classie.js"></script>
+<script src="/static/user/js/cbpViewModeSwitch.js"></script>
+<script>
+
+    window.onload = function () {
+        vm.getData(1, 9)
+        vm.init_info()
+    }
+    const vm = new Vue({
+        el: "#app",
+        data() {
+            return {
+                flowerList: [],
+                loading: false,
+                noMore: false,
+                loadMoreBtn: true,
+                uName: "",
+                userId: "",
+                toLog: true,
+                user: false,
+                keyWords: "",
+                showMessage: false,
+                start: 1,
+                end: 9,
+            }
+        },
+        computed: {},
+        methods: {
+            load() {
+                this.loadMoreBtn = false
+                this.loading = true
+                if (this.end === 233) {
+                    this.loadMoreBtn = false
+                    this.loading = false
+                    this.noMore = true
+                } else {
+                    setTimeout(() => {
+                        this.getData(this.end + 1, this.end + 9)
+                        this.end += 9
+                        this.loading = false
+                        this.loadMoreBtn = true
+                    }, 1500)
+                }
+
+            },
+            init_info() {
+                if (localStorage.getItem("userToken") !== null) {
+                    this.toLog = false
+                    this.user = true
+                    this.uName = localStorage.getItem("fs-username")
+                    this.userId = localStorage.getItem("fs-userId")
+                } else {
+                    this.toLog = true
+                    this.user = false
+                }
+            },
+            getData(start, end) {
+                axios.get("/web/tws/fs/api/data/flower-list?start=" + start + "&end=" + end).then(response => {
+                    if (response.data.code === 0) {
+                        const tmpList = response.data.response.data
+                        for (let i = 0; i < tmpList.length; i++) {
+                            this.flowerList.push(tmpList[i])
+                        }
+                    } else {
+                        this.$message.error("服务器异常，商品数据获取失败")
+                    }
+                }).catch(() => {
+                    this.$message.error("系统异常，商品数据获取失败")
+                })
+            },
+            toBuy(itemId) {
+                localStorage.setItem("itemId", itemId)
+                window.open("/buy?itemId=" + itemId, "_blank")
+            },
+            toLogin() {
+                window.location = "/user/login-register"
+            },
+            toUserCenter(command) {
+                if (command === "center") {
+                    if (localStorage.getItem("userToken") !== null) {
+                        // axios.get("").then(response=>{
+                        window.location.href = "/user/user-info?uid=" + localStorage.getItem("fs-userId") + "&tk=" + localStorage.getItem("userToken")
+                        // })
+                    }
+                }
+                if (command === "myCart") {
+                    window.location = "/user/cart?tk=" + localStorage.getItem("userToken") + "&u=" + localStorage.getItem("fs-userId")
+                }
+                if (command === "logout") {
+                    axios.post("/api/user/logout?tk=" + localStorage.getItem("userToken")).then(response => {
+                        console.log(response)
+                        if (response.data.code === 0) {
+                            localStorage.removeItem("userToken")
+                            localStorage.removeItem("fs-username")
+                            localStorage.removeItem("fs-userId")
+                            this.toLog = true
+                            this.user = false
+                        } else {
+                            this.$message.error("出现错误，登录出异常")
+                        }
+                    }).catch(() => {
+                        this.$message.error("系统异常，请稍后再试")
+                    })
+
+                }
+
+            },
+            userSearch() {
+                if (this.keyWords !== "") {
+                    this.loadMoreBtn=false
+                    axios.post("/web/tws/fs/api/data/flower/search?key=" + this.keyWords).then(response => {
+                        if (response.data.code === 0) {
+                            this.flowerList = response.data.response
+                            console.log(response.data.response)
+                            this.showMessage = this.flowerList.length === 0;
+                        }
+                    })
+                } else if (this.keyWords === "") {
+                    this.loadMoreBtn=true
+                    this.showMessage=false
+                    this.$message.info("亲，可以输入内容后再进行搜索哦")
+                }
+
+            },
+            sliceWithStep(array, start, end, step) {
+                const slicedArray = [];
+                if (step === 0) {
+                    throw new Error("Step cannot be zero.");
+                }
+                if (step > 0) {
+                    for (let i = start; i < end; i += step) {
+                        if (i < array.length) {
+                            slicedArray.push(array[i]);
+                        } else {
+                            break;
+                        }
+                    }
+                } else {
+                    for (let i = start; i > end; i += step) {
+                        if (i >= 0) {
+                            slicedArray.push(array[i]);
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            },
+        }
+    })
+
+</script>
+
+</body>
+</html>

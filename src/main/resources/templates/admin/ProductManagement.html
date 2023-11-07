@@ -1,0 +1,479 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <script src="/static/public/js/vue.js"></script>
+    <link rel="stylesheet" href="/static/public/css/element-ui.css">
+    <link href="/favicon.ico" rel="icon">
+    <script src="/static/public/js/axios.js"></script>
+    <script src="/static/public/js/element-ui.js"></script>
+    <link href="/static/admin/css/reset.css" rel="stylesheet"/>
+    <link href="/static/admin/css/iconfont.css" rel="stylesheet"/>
+    <link href="/static/admin/css/index.css" rel="stylesheet"/>
+    <script src="/static/public/js/jquery.main.js"></script>
+    <title>产品管理</title>
+</head>
+<body>
+<!--右侧-->
+<div id="product">
+    <div class="RightBox">
+        <div class="PublicContentBox">
+            <!--公用指向页面名字-->
+            <div class="PublicPointToAgeText">
+                <span class="span1">产品管理  </span> <span class="span2">后台管理产品列表</span>
+            </div>
+            <!--查询-->
+            <div class="InquireBox clearfix">
+                <div class="InquireleftBox">
+                    <div class="Text">产品名称：</div>
+                    <div class="InputDiv"><input class="phoneInput" v-model="searchKeyWords"
+                                                 placeholder="请输入你需要查询的产品名称"/></div>
+                </div>
+                <div class="InquireleftBox">
+                    <div class="Text">产品分类：</div>
+                    <div class="InputDiv">
+                        <i class=" iconfont icon-xiala"></i>
+                        <label>
+                            <select class="phoneInput" v-model="label">
+                                <option label="鲜花" value="0"></option>
+                                <option label="礼品" value="1"></option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                <div class="PublicBtnIcon Color1Btn fr" @click="search">
+                    <i class="iconfont icon-icon-chaxun"></i>
+                    <span>查询</span>
+                </div>
+            </div>
+            <!--表修改-->
+            <div class="InquireTableBox">
+                <div class="headbox">
+                    <div class="headboxtext">
+                        <span class="span1">后台管理产品列表</span>
+                    </div>
+                    <!--批量删除-->
+                    <div class="PublicBtnIcon Color5Btn" @click="deleteCheckAll">
+                        <i class="iconfont  icon-shanchu"></i>
+                        <span>批量删除</span>
+                    </div>
+
+                    <div class="PublicBtnIcon Color2Btn fr" @click="showAddBox(1)">
+                        <i class="iconfont icon-changyongtubiao-mianxing-"></i>
+                        <span>添加</span>
+                    </div>
+                </div>
+
+                <!--查询到的表格-->
+
+                <div class="InquireSelectTable">
+                    <table class="PublicTableCss">
+                        <thead>
+                        <tr>
+                            <td>
+                                <input id="checkAll" class="inputcheck" type="checkbox" name="inputcheck"/>
+                                <label for="checkAll"></label>
+                                <span>全选</span>
+                            </td>
+                            <td>产品ID</td>
+                            <td>产品图片</td>
+                            <td>产品名称</td>
+                            <td>产品描述</td>
+                            <td>产品价格</td>
+                            <td>产品类别</td>
+                            <td>操作</td>
+                        </tr>
+
+                        </thead>
+                        <tbody>
+                        <tr v-for="(item,index) in productList.slice((currentPage-1)*pageSize,currentPage*pageSize)"
+                            :key="index">
+                            <td>
+                                <input :id="'aa'+index" class="inputcheck checkbox-item" type="checkbox"
+                                       v-model="checkBoxRows" :value="item.id"/>
+                                <label :for="'aa'+index"></label>
+                            </td>
+                            <td>{{item.id}}</td>
+                            <td>
+                                <div class="productImgBox">
+                                    <img :src="'http://localhost:5200'+item.imgUrl" alt=""/>
+                                </div>
+                            </td>
+                            <td>{{item.title}}</td>
+                            <td>{{item.introduce}}</td>
+                            <td>{{item.price}}元</td>
+                            <td>{{item.itemLabel === 0 ? '鲜花' : '礼品'}}</td>
+                            <td>
+
+                                <div class="PublicTableBtnIcon Color3Btn" @click="showEditBox(1,item.id)">
+                                    <i class="iconfont icon-tubiaozhizuomobanyihuifu-"></i>
+                                    <span>编辑</span>
+                                </div>
+
+                                <div class="PublicTableBtnIcon Color4Btn" @click="deleteProduct(item.id)">
+                                    <i class="iconfont icon-shanchu"></i>
+                                    <span>删除</span>
+                                </div>
+                            </td>
+                            <el-dialog
+                                    :visible.sync="visible"
+                                    title="产品编辑"
+                                    width="400px"
+                                    center
+                            >
+                                <el-form :model="editList" label-width="80px" :label-position="'right'">
+                                    <el-form-item label="编号">
+                                        <el-input v-model="editList.id" style="width: 200px"
+                                                  autocomplete="off"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="名称">
+                                        <el-input v-model="editList.title" style="width: 200px"></el-input>
+                                    </el-form-item>
+                                    <!--                                    <el-form-item label="图片">-->
+                                    <!--                                        <div class="imgBox" style="display: flex">-->
+                                    <!--                                            <img :src="previewImageURL" alt="预览图片" width="80" height="auto"-->
+                                    <!--                                                 v-if="previewImageURL">-->
+                                    <!--                                        </div>-->
+                                    <!--                                        <input type="file" ref="fileInput" @change="uploadFile">-->
+                                    <!--                                    </el-form-item>-->
+                                    <el-form-item label="价格">
+                                        <el-input v-model="editList.price" style="width: 200px"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="描述">
+                                        <el-input v-model="editList.introduce" style="width: 200px"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="标签">
+                                        <el-select v-model="editList.itemLabel===0?'鲜花':'礼品'" style="width: 200px">
+                                            <el-option label="鲜花" value="0"></el-option>
+                                            <el-option label="礼品" value="1"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </el-form>
+
+                                <div slot="footer" class="dialog-footer">
+                                    <el-button @click="showEditBox(2)">取 消</el-button>
+                                    <el-button type="primary" @click="submitEdit">确 定</el-button>
+                                </div>
+                            </el-dialog>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+                <!--分页-->
+                <div class="PageNumber">
+                    <el-pagination
+                            background
+                            @size-change="handleSizeChange"
+                            @current-change="handleCurrentChange"
+                            :current-page="currentPage"
+                            :page-sizes="[5, 10, 15, 30]"
+                            :page-size="pageSize"
+                            layout="total, sizes, prev, pager, next, jumper"
+                            :total="productList.length"
+                    >
+                    </el-pagination>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--添加产品-->
+    <el-dialog
+            :visible.sync="addVisible"
+            title="添加产品"
+            width="400px"
+            center
+    >
+        <el-form :model="addList" label-width="80px" :label-position="'right'">
+            <el-form-item label="编号">
+                <el-input v-model="addList.id" style="width: 200px"
+                          autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="名称">
+                <el-input v-model="addList.title" style="width: 200px"></el-input>
+            </el-form-item>
+            <el-form-item label="图片">
+                <div class="imgBox" style="display: flex">
+                    <img :src="previewImageURL" alt="预览图片" width="80" height="auto"
+                         v-if="previewImageURL">
+                </div>
+                <input type="file" ref="fileInput" @change="uploadFile">
+            </el-form-item>
+            <el-form-item label="价格">
+                <el-input v-model="addList.price" style="width: 200px"></el-input>
+            </el-form-item>
+            <el-form-item label="描述">
+                <el-input v-model="addList.introduce" style="width: 200px"></el-input>
+            </el-form-item>
+            <el-form-item label="标签">
+                <el-select v-model="addList.itemLabel" style="width: 200px">
+                    <el-option label="鲜花" value="0"></el-option>
+                    <el-option label="礼品" value="1"></el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="showAddBox(2)">取 消</el-button>
+            <el-button type="primary" @click="add">确 定</el-button>
+        </div>
+    </el-dialog>
+</div>
+<script src="/static/admin/js/f.js"></script>
+<script>
+    window.onload = function () {
+        vm.init_data()
+    }
+
+    const vm = new Vue({
+        el: "#product",
+        data() {
+            return {
+                currentPage: 1, //初始页
+                pageSize: 5,
+                productList: [],
+                pageNumberData: [],
+                checkBoxRows: [],
+                pageNumber: 1,
+                visible: false,
+                addVisible: false,
+                previewImageURL: "",
+                editList: {
+                    id: "",
+                    title: "",
+                    price: "",
+                    introduce: "",
+                    imgUrl: "",
+                    itemLabel: ""
+                },
+                addList: {
+                    id: "",
+                    title: "",
+                    price: "",
+                    introduce: "",
+                    itemLabel: "",
+                    imgUrl: "",
+                },
+                searchKeyWords: "",
+                label: "",
+                imgFile: ""
+            }
+        },
+        methods: {
+            pageNumberNext() {
+
+            },
+            pageNumberReturn() {
+
+            },
+            // 初始页currentPage、初始每页数据数pagesize和数据data
+            handleSizeChange: function (size) {
+                this.pageSize = size
+                // console.log(this.pagesize)  //每页下拉显示数据
+            },
+            handleCurrentChange: function (currentPage) {
+                this.currentPage = currentPage
+                // console.log(this.currentPage)  //点击第几页
+            },
+            init_data() {
+                axios.get("/web/tws/fs/api/admin/data/productInfo").then(response => {
+                    this.productList = response.data.response
+                })
+            },
+            deleteCheckAll() {
+                this.$confirm("确定要删除选中的数据吗？该操作无法撤回！是否继续？", "系统提示", {
+                    confirmButtonText: "是",
+                    cancelButtonText: "否",
+                    type: "warning",
+                    center: true
+                }).then(() => {
+                    axios.post("/web/tws/fs/api/admin/data/product/deleteList?tk=" + localStorage.getItem("adminToken"),
+                        this.checkBoxRows
+                    ).then(response => {
+                        if (response.data.code === 0) {
+                            this.$message.success(response.data.response)
+                            this.init_data()
+                        } else {
+                            this.$message.error(response.data.response)
+                        }
+                    }).catch(() => {
+                        this.$message.error("系统异常，请稍后再试")
+                    })
+                })
+                console.log(this.checkBoxRows)
+            },
+            showEditBox(index, id) {
+                if (index === 1) {
+                    this.visible = true
+                    this.searchById(id)
+                }
+                if (index === 2) {
+                    this.visible = false
+                }
+            },
+            showAddBox(index) {
+                if (index === 1) {
+                    this.addVisible = true
+                }
+                if (index === 2) {
+                    this.addVisible = false
+                }
+            },
+            clearInput() {
+
+            },
+            async uploadImage() {
+                const formData = this.uploadFile()
+                await axios({
+                    url: "/file/upload/project/images?id=" + this.addList.id,
+                    method: "POST",
+                    data: formData,
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    }
+                }).then(response => {
+                    localStorage.setItem("imgUrl", response.data)
+                }).catch(() => {
+                    this.$message.error("系统错误，添加失败")
+                })
+            },
+
+            async add() {
+                const data = await this.uploadImage()
+                console.log("返回的是", data)
+                const form = {
+                    "id": this.addList.id,
+                    "title": this.addList.title,
+                    "introduce": this.addList.introduce,
+                    "price": this.addList.price,
+                    "itemLabel": this.addList.itemLabel,
+                    "imgUrl": localStorage.getItem("imgUrl")
+                }
+                console.log(form)
+                await axios.post(
+                    "/web/tws/fs/api/admin/data/product/add?tk=" + localStorage.getItem("adminToken"),
+                    form
+                ).then(resp => {
+                    if (resp.data.code === 0) {
+                        this.$message.success(resp.data.response)
+                        this.showAddBox(2)
+                        this.init_data()
+                    } else {
+                        this.$message.error(resp.data.response)
+                    }
+                }).catch(() => {
+                    this.$message.error("系统异常，请稍后再试")
+                })
+            },
+            search() {
+                //搜索功能
+                if (this.searchKeyWords === "" && this.label === "") {
+                    this.init_data()
+                } else {
+                    axios.post("/web/tws/fs/api/admin/data/product/search?tk="
+                        + localStorage.getItem("adminToken") + "&title=" + this.searchKeyWords
+                        + "&label=" + this.label
+                    ).then(response => {
+                        if (response.data.code === 0) {
+                            this.productList = response.data.response
+                        } else {
+                            this.$message.info("查询失败，暂无该物品")
+                        }
+                    }).catch(() => {
+                        this.$message.error("系统错误，请稍后再试")
+                    })
+                }
+
+            },
+            searchById(id) {
+                axios.post("/web/tws/fs/api/admin/data/product/byId?tk=" + localStorage.getItem("adminToken") + "&id=" + id).then(response => {
+                    if (response.data.code === 0) {
+                        this.editList.id = response.data.response.data[0].id
+                        this.editList.title = response.data.response.data[0].title
+                        this.editList.price = response.data.response.data[0].price
+                        this.editList.introduce = response.data.response.data[0].introduce
+                        this.editList.itemLabel = response.data.response.data[0].itemLabel
+                        console.log(this.editList)
+                    } else {
+                        this.$message.error("数据获取失败")
+                    }
+                }).catch(() => {
+                    this.$message.error("服务异常，请稍后再试")
+                })
+            },
+            previewImage() {
+                const fileInput = this.$refs.fileInput;
+                const file = fileInput.files[0];
+
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        this.previewImageURL = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    this.previewImageURL = null;
+                }
+            },
+            uploadFile() {
+                this.previewImage()
+                const fileInput = this.$refs.fileInput;
+                const file = fileInput.files[0];
+
+                const formData = new FormData();
+                formData.append('file', file);
+                // 使用Axios或其他HTTP库将文件上传到后端
+                // 请确保在请求头中设置适当的Content-Type和其他必要的信息
+                return formData
+            },
+            submitEdit() {
+                const form = {
+                    "id": this.editList.id,
+                    "title": this.editList.title,
+                    "introduce": this.editList.introduce,
+                    "price": this.editList.price,
+                    "itemLabel": this.editList.itemLabel,
+                }
+
+                axios.post("/web/tws/fs/api/admin/data/product/edit?tk=" + localStorage.getItem("adminToken"),
+                    form
+                ).then(response => {
+                    if (response.data.code === 0) {
+                        this.$message.success("修改成功")
+                        this.showEditBox(2)
+                        this.init_data()
+                    } else {
+                        this.$message.error("修改失败，请稍后再试")
+                    }
+
+                }).catch(() => {
+                    this.$message.error("服务异常，请稍后再试")
+                })
+            },
+            deleteProduct(id) {
+                this.$confirm("该操作无法撤回，是否继续", "系统提示", {
+                    confirmButtonText: "是",
+                    cancelButtonText: "否",
+                    center: true,
+                    type: "warning",
+                }).then(() => {
+                    axios.post("/web/tws/fs/api/admin/data/product/delete?tk=" + localStorage.getItem("adminToken") + "&id=" + id,).then(response => {
+                        if (response.data.code === 0) {
+                            this.$message.success("已删除成功！")
+                            this.init_data()
+                        } else {
+                            this.$message.error("删除失败，请稍后再试")
+                        }
+                    }).catch(() => {
+                        this.$message.error("服务异常，请稍后再试")
+                    })
+                })
+            }
+        }
+    })
+
+</script>
+</body>
+</html>

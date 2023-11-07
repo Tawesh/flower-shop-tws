@@ -1,0 +1,531 @@
+﻿<!DOCTYPE>
+<html lang="ch">
+<head>
+    <meta charset="UTF-8">
+    <title id="buyTitle"></title>
+    <link href="/static/public/css/element-ui.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/public/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/public/bootstrap/font/bootstrap-icons.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/user/css/shouye.css">
+    <script src="/static/public/js/jquery.main.js"></script>
+    <link href="/favicon.ico" rel="icon">
+    <script src="/static/user/js/modernizr-custom-v2.7.1.min.js"></script>
+    <script src="/static/public/js/vue.js"></script>
+    <script src="/static/public/js/element-ui.js"></script>
+    <script src="/static/public/js/axios.js"></script>
+    <script src="/static/user/js/vue-swal.js"></script>
+    <script src="/static/public/bootstrap/js/bootstrap.js"></script>
+    <script src="/static/user/script.js"></script>
+    <link rel="stylesheet" href="/static/user/reset.min.css">
+    <link rel='stylesheet' href='/static/user/roboto.css'>
+    <link rel="stylesheet" href="/static/user/style.css">
+    <link rel="stylesheet" href="/static/user/cart/css/normalize.css">
+    <script src="/static/user/cart/js/jquery.animate_from_to-1.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            vm.init_itemInfo()
+            var $miaobian = $('.Xcontent08>div');
+            var $huantu = $('.Xcontent06>img');
+            var $miaobian1 = $('.Xcontent26>div');
+            $miaobian.mousemove(function () {
+                miaobian(this);
+            });
+            $miaobian1.click(function () {
+                miaobian1(this);
+            });
+
+            function miaobian(thisMb) {
+                for (var i = 0; i < $miaobian.length; i++) {
+                    $miaobian[i].style.borderColor = '#dedede';
+                }
+                thisMb.style.borderColor = '#cd2426';
+
+                $huantu[0].src = thisMb.children[0].src;
+            }
+
+            function miaobian1(thisMb1) {
+                for (var i = 0; i < $miaobian1.length; i++) {
+                    $miaobian1[i].style.borderColor = '#dedede';
+                }
+//		thisMb.style.borderColor = '#cd2426';
+                $miaobian.css('border-color', '#dedede');
+                thisMb1.style.borderColor = '#cd2426';
+                $huantu[0].src = thisMb1.children[0].src;
+            }
+
+        })
+    </script>
+
+</head>
+<body>
+<div id="order">
+    <div style="position: fixed;width: 100%;z-index: 999;">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03"
+                    aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/">OnlineShop</a>
+
+            <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+                <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/"><i class="bi bi-house"></i>首页<span
+                                class="sr-only">(current)</span></a>
+                    </li>
+                </ul>
+                <div class="form-inline my-2 my-lg-0">
+                    <ul class="navbar-nav mr-auto" style="position:relative;right: 50px">
+                        <li class="nav-item" id="cart">
+                            <el-badge :value="cartNum" class="item">
+                                <el-button @click="toCart">
+                                    <i class="bi bi-cart3"></i>购物车
+                                </el-button>
+                            </el-badge>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </div>
+    <div class="Xcontent" style="position: relative;top: 80px">
+        <ul class="Xcontent01">
+            <div class="Xcontent06"><img :src="'http://localhost:5200'+goodsInfo.imgUrl">
+                <div style="position: absolute;top: 450px;left: 280px">
+                    <el-statistic :value="deadline2" time-indices title="🎉商品降价🎉">
+                        <template slot="suffix">
+                            抢购即将开始
+                        </template>
+                    </el-statistic>
+                </div>
+            </div>
+
+            <ol class="Xcontent13">
+                <div class="Xcontent14"><a href="#"><p>{{goodsInfo.title}}</p></a>
+                </div>
+                <div class="Xcontent15"><img src="/static/user/images/shangpinxiangqing/X11.png">
+
+                </div>
+                <div class="Xcontent16"><p>{{goodsInfo.introduce}}</p>
+                </div>
+                <div class="Xcontent17">
+                    <p class="Xcontent18">售价</p>
+                    <p class="Xcontent19">￥<span>{{goodsInfo.price}}</span></p>
+                    <div class="Xcontent20">
+                        <p class="Xcontent21">促销</p>
+                        <img src="/static/user/images/shangpinxiangqing/X12.png">
+                        <p class="Xcontent22">领610元新年礼券，满再赠好礼</p>
+                    </div>
+                    <div class="Xcontent23">
+                        <p class="Xcontent24">服务</p>
+                        <p class="Xcontent25">30天无忧退货&nbsp;&nbsp;&nbsp;&nbsp; 48小时快速退款 &nbsp;&nbsp;&nbsp;&nbsp;
+                            满88元免邮</p>
+                    </div>
+                </div>
+                <div style="width: 400px">
+                    <p class="Xcontent27">地址</p>
+                    <p class="Xcontent27" style="width: 300px">
+                        <el-input v-model="address"></el-input>
+                        <span class="rules" style="color: red" v-show="addWar">收货地址未正确填写!</span>
+                    </p>
+
+                </div>
+                <div style="width: 400px">
+                    <p class="Xcontent27">手机</p>
+                    <p class="Xcontent27" style="width: 300px">
+                        <el-input v-model="phone"></el-input>
+                        <span class="rules" style="color: red" v-show="phoWar">手机号未正确填写!</span>
+                    </p>
+                </div>
+                <div class="Xcontent30">
+                    <p class="Xcontent31">数量</p>
+                    <div class="Xcontent32" @click="toLilte"><img src="/static/user/images/shangpinxiangqing/X15.png">
+                    </div>
+                    <form><label>
+                        <input class="input" v-model="buyNum">
+                    </label></form>
+                    <div class="Xcontent33" @click="addBuy"><img src="/static/user/images/shangpinxiangqing/16.png">
+                    </div>
+                    <div class="inTotal-pay">
+                        <p class="Xcontent31" style="position: relative;left: 10px">总计支付</p>
+                        <p class="Xcontent31" style="font-size: 25px">{{buyNum * goodsInfo.price}} <span>￥</span></p>
+                    </div>
+                </div>
+                <div style="display: flex">
+                    <div class="Xcontent34">
+                        <!--                    <img src="/static/user/images/shangpinxiangqing/X17.png">-->
+                        <button class="order firstPay" @click="toPay" v-show="visibleActive">
+                            <span class="default">马上下单</span>
+                            <span class="success">下单成功/去支付
+                        <svg viewbox="0 0 12 10">
+                            <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                        </svg>
+                        </span>
+                            <div class="box"></div>
+                            <div class="truck">
+                                <div class="back"></div>
+                                <div class="front">
+                                    <div class="window"></div>
+                                </div>
+                                <div class="light top"></div>
+                                <div class="light bottom"></div>
+                            </div>
+                            <div class="lines"></div>
+                        </button>
+                        <button class="order rePay" @click="secondPay" v-show="visiblePay">
+                        <span class="success">重新支付
+                        <svg viewbox="0 0 12 10">
+                            <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                        </svg>
+                        </span>
+                        </button>
+                    </div>
+                    <div class="Xcontent35" id="prod_123">
+                        <button type="button" @click="init_cart" class="cart-btn btn btn-success">
+                            <i class="bi bi-cart4"></i>
+                            加入购物车
+                        </button>
+                    </div>
+                </div>
+            </ol>
+        </ul>
+    </div>
+    <div style="position: fixed;right: 8%;bottom: 12%" onclick="window.open('about:blank','_self').close()">
+        <el-tooltip content="关闭当前页面" effect="light">
+            <svg t="1698329813788" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                 xmlns="http://www.w3.org/2000/svg" p-id="10306" width="64" height="64">
+                <path d="M512 512m-448 0a448 448 0 1 0 896 0 448 448 0 1 0-896 0Z" fill="#5090F1" p-id="10307">
+                </path>
+                <path d="M512 455.431l169.706-169.705a8 8 0 0 1 11.313 0l45.255 45.255a8 8 0 0 1 0 11.313L568.57 512l169.705 169.706a8 8 0 0 1 0 11.313l-45.255 45.255a8 8 0 0 1-11.313 0L512 568.57 342.294 738.274a8 8 0 0 1-11.313 0l-45.255-45.255a8 8 0 0 1 0-11.313L455.43 512 285.726 342.294a8 8 0 0 1 0-11.313l45.255-45.255a8 8 0 0 1 11.313 0L512 455.43z"
+                      fill="#FFFFFF" p-id="10308">
+                </path>
+            </svg>
+        </el-tooltip>
+    </div>
+    <el-dialog
+            :visible.sync="showPayImg"
+            title="请支付"
+            center
+            width="400px"
+            :show-close="false"
+            :close-on-click-modal="false"
+            :close-on-press-escape="false"
+    >
+        <div style="position: relative;margin: auto;text-align: center">
+            <div>
+                <el-statistic
+                        @finish="hilarity"
+                        :value="deadline3"
+                        time-indices
+                        :title="'订单编号:'+orderId"
+
+                >
+                </el-statistic>
+            </div>
+            <img src="/static/user/image/wchatPay.jpg" alt="" width="150px" height="auto">
+            <div style="position:relative;top: 5px">
+                <span>支付金额：{{buyNum * goodsInfo.price}}￥</span>
+            </div>
+        </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="cancelPay">未支付</el-button>
+        <el-button type="primary" @click="init_Pay">已支付</el-button>
+        </span>
+
+    </el-dialog>
+
+</div>
+
+
+<script>
+    const vm = new Vue({
+        el: "#order",
+        data() {
+            return {
+                deadline3: Date.now() + 1000 * 60 * 5,
+                visibleActive: true,
+                visiblePay: false,
+                totalPay: 0,
+                buyNum: 1,
+                price: 158,
+                address: "",
+                phone: "",
+                goodsInfo: {},
+                itemId: "",
+                itemTitle: "",
+                itemPrice: "",
+                describe: "",
+                cartNum: 0,
+                addWar: false,
+                phoWar: false,
+                type: 0,
+                orderId: "",
+                deadline2: Date.now() + 1000 * 60 * 60 * 8,
+                showPayImg: false,
+            }
+        },
+        methods: {
+            init_itemInfo() {
+                console.log(localStorage.getItem("itemId"))
+                axios.get("/web/tws/fs/api/data/flower?itemId=" + this.getUrlParam("itemId") + "&tk=" + localStorage.getItem("userToken") + "&userId=" + localStorage.getItem("fs-userId")).then(response => {
+                    if (response.data.code === 0) {
+                        this.goodsInfo = response.data.response.data[0]
+                        this.itemPrice = response.data.response.data[0].price
+                        this.itemTitle = response.data.response.data[0].title
+                        this.itemId = response.data.response.data[0].id
+                        this.describe = response.data.response.data[0].introduce
+                        this.type = response.data.response.data[0].itemLabel
+                        this.cartNum = response.data.cartNum
+                        document.getElementById("buyTitle").innerText = "购买-" + this.goodsInfo.title
+                    } else {
+                        this.$confirm("您好！请先登录", "系统提示", {
+                            confirmButtonText: "好的，马上登录",
+                            cancelButtonText: "我还不想购买",
+                            center: true,
+                            type: "warning"
+                        }).then(() => {
+                            window.location.href = "/user/login-register"
+                        })
+                    }
+
+                })
+            },
+            hilarity() {
+                this.$swal({
+                    title: "支付超时!",
+                    text: "亲！请在规定的时间内完成支付哦!",
+                    icon: "warning",
+                    button: "好的，我已知晓!",
+                }).then(() => {
+                    this.showPayImg = false
+                    this.visibleActive = false
+                    this.visiblePay = true
+                    let button = $('.rePay');
+                    if (!button.hasClass('animate')) {
+                        button.addClass('animate');
+                    }
+                })
+            },
+            init_cart() {
+                if (localStorage.getItem("userToken") !== null) {
+                    $("#prod_123").animate_from_to("#cart");
+                    setTimeout(() => {
+                        this.addCart()
+                    }, 1000)
+                } else {
+                    this.$notify({
+                        title: '警告',
+                        message: '请先登录',
+                        type: 'warning'
+                    });
+                    setTimeout(() => {
+                        const nowDate = new Date()
+                        window.location = "/user/login-register?source=buy&t=" + nowDate.getTime()
+                    }, 2000)
+                }
+            },
+            addCart() {
+                const form = {
+                    "cartId": this.generateOrderNumber(),
+                    "itemId": this.itemId,
+                    "itemTitle": this.itemTitle,
+                    "itemPrice": this.itemPrice,
+                    "userId": localStorage.getItem("fs-userId"),
+                    "describe": this.describe,
+                    "buyN": this.buyNum,
+                    "createTime": this.getCurrentTime(),
+                    "type": this.type,
+                    "selected": false,
+                }
+
+                if (localStorage.getItem("userToken") !== null) {
+
+                    axios.post("/shop/cart/insert", form).then(response => {
+                        if (response.data.code === 0) {
+                            this.$message.success(response.data.response)
+                            this.init_itemInfo()
+                        } else {
+                            this.$message.warning("服务异常，添加购物车失败，请稍后再试")
+                        }
+                    }).catch(() => {
+                        this.$message.error("服务异常，请稍后再试")
+                    })
+
+                }
+
+            },
+            addBuy() {
+                this.buyNum++
+            },
+            toLilte() {
+                if (this.buyNum === 1) {
+                    this.$message.warning("购买的数量至少为1")
+                } else {
+                    this.buyNum--
+                }
+            },
+            toPay() {
+                if (localStorage.getItem("userToken") !== null) {
+                    this.addWar = this.address === "";
+                    this.phoWar = this.phone === "";
+
+                    // button.removeClass('animate');
+                    if (this.address !== "" && this.phone !== "") {
+                        let button = $('.firstPay');
+                        if (!button.hasClass('animate')) {
+                            button.addClass('animate');
+                            setTimeout(() => {
+                                this.showPayImg = true
+                                this.addOrder(0)
+                            }, 8000)
+                        }
+
+                    }
+
+                } else {
+                    this.$notify({
+                        title: '警告',
+                        message: '请先登录',
+                        type: 'warning'
+                    });
+                    setTimeout(() => {
+                        const nowDate = new Date()
+                        window.location = "/user/login-register?source=buy&t=" + nowDate.getTime()
+                    }, 2000)
+                }
+
+
+            },
+            init_Pay() {
+                this.showPayImg = false
+                this.rePay(true, 1, this.orderId)
+            },
+            cancelPay() {
+                this.showPayImg = false
+                this.$message.warning("支付失败，购买不成功哦！")
+                this.visibleActive = false
+                this.visiblePay = true
+                let button = $('.rePay');
+                if (!button.hasClass('animate')) {
+                    button.addClass('animate');
+                }
+            },
+            secondPay() {
+                this.showPayImg = true
+                this.deadline3 = Date.now() + 1000 * 60 * 5
+            },
+            rePay(isPay, payNum, orderId) {
+                if (isPay) {
+                    axios.post("/web/tws/fs/api/data/repay", {
+                        "payNum": payNum,
+                        "orderId": orderId
+                    }).then(response => {
+                        if (response.data.code === 0) {
+                            this.$swal({
+                                title: "感谢您的信赖!",
+                                text: "亲！等待3-4个工作日即可收货哦!",
+                                icon: "success",
+                                button: "好的，我已知晓!",
+                            }).then(() => {
+                                window.open("about:blank", "_self").close()
+                            })
+                        } else {
+                            this.$message.error("支付失败")
+                        }
+                    }).catch(() => {
+                        this.$message.error("系统异常，请稍后再试")
+                    })
+                }
+            },
+            //添加订单信息
+            addOrder(payStatus) {
+                this.orderId = this.generateOrderNumber()
+                //封装订单信息
+                const order = {
+                    "orderId": this.orderId,
+                    "itemTitle": this.itemTitle,
+                    "userId": localStorage.getItem("fs-userId"),
+                    "price": this.itemPrice,
+                    "number": this.buyNum,
+                    "itemId": this.itemId,
+                    "total": this.itemPrice * this.buyNum,
+                    "payStatus": payStatus,
+                    "orderStatus": 0,
+                    "address": this.address,
+                    "phone": this.phone,
+                    "changeDate": this.getCurrentTime(),
+                }
+                console.log(order)
+                axios.post("/web/tws/fs/api/data/order-info/add?tk=" + localStorage.getItem("userToken"), order).then(response => {
+                    if (response.data.code === 0) {
+                        this.$notify({
+                            title: '成功',
+                            message: '订单已生成',
+                            type: 'success'
+                        });
+                    } else if (response.data.code === -2) {
+                        this.$notify({
+                            title: '警告',
+                            message: '请先登录',
+                            type: 'warning'
+                        });
+                        setTimeout(() => {
+                            const nowDate = new Date()
+                            window.location = "/user/login-register?s=buy&timestamp=" + nowDate.getTime()
+                        }, 2000)
+                    } else {
+                        this.$notify({
+                            title: '失败',
+                            message: '订单未生成',
+                            type: 'error'
+                        });
+                    }
+                }).catch(() => {
+                    this.$message.error("系统异常，请稍后重试")
+                })
+            },
+            generateOrderNumber() {
+                // 获取当前日期，格式为YYYYMMDD
+                const date = new Date();
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从0开始，需要+1
+                const day = String(date.getDate()).padStart(2, '0');
+
+                // 生成一个四位数的随机数
+                const random = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+
+                // 组合订单号
+                return `${year}${month}${day}${random}`;
+            },
+            getCurrentTime() {
+                const date = new Date();
+
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从0开始，需要+1
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const seconds = String(date.getSeconds()).padStart(2, '0');
+
+                return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            },
+            toCart() {
+                window.location = "/user/cart?tk=" + localStorage.getItem("userToken") + "&u=" + localStorage.getItem("fs-userId")
+            },
+            getUrlParam(params) {
+                // 获取查询字符串部分
+                var queryString = window.location.search;
+
+                // 从查询字符串中获取参数
+                var urlParams = new URLSearchParams(queryString);
+
+                // 使用 get() 方法获取特定参数的值
+                return urlParams.get(params);
+            }
+        }
+    })
+</script>
+</body>
+</html>
+

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>网站统计</title>
+  <link href="/static/public/css/element-ui.css" type="text/css" rel="stylesheet">
+  <script src="/static/public/js/vue.js"></script>
+  <script src="/static/public/js/axios.js"></script>
+  <script src="/static/public/js/element-ui.js"></script>
+  <link rel="stylesheet" href="/static/public/bootstrap/css/bootstrap.css">
+  <link rel="stylesheet" href="/static/public/bootstrap/font/bootstrap-icons.css">
+</head>
+<body>
+
+<div class="container" style="position: relative;left: -50px">
+  <h1>网站统计</h1>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">PV统计</h5>
+
+          <p class="card-text"><i class="bi bi-airplane"></i>1,000,000</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">销量</h5>
+          <p class="card-text"><i class="bi bi-bag"></i>{{orderCount}}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">用户注册</h5>
+          <p class="card-text"><i class="bi bi-people"></i>50,000</p>
+        </div>
+      </div>
+    </div>
+    <div style="position: relative; top: 50px;display: flex;">
+      <div class="col-md-5">
+        <div class="card" style="width: 480px;height: 400px">
+          <div class="card-body">
+            <h5 class="card-title">系统评分</h5>
+            <div id="container-1" style="height: 100%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <div class="card" style="width: 680px;height: 400px">
+          <div class="card-body">
+            <h5 class="card-title">销售量数据图</h5>
+            <div id="container-2" style="height: 100%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/static/public/js/jquery.main.js"></script>
+<script src="/static/admin/js/popper.min.js"></script>
+<script src="/static/public/bootstrap/js/bootstrap.js"></script>
+<script src="/static/admin/js/echarts.min.js"></script>
+
+
+<script>
+  window.onload=function (){
+    vm.init_data()
+  }
+  const vm = new Vue({
+    el:".container",
+    data(){
+      return{
+        orderCount:0,
+      }
+    },
+    methods:{
+      init_data(){
+        console.log(localStorage.getItem("adminToken"))
+        axios.get("/web/tws/fs/api/admin/data/websiteInfo").then(response=>{
+          this.orderCount=response.data.orderCount+1560
+        })
+      }
+    }
+  })
+</script>
+
+<script type="text/javascript" src="/static/admin/js/echarts.map-1.js"></script>
+<script type="text/javascript" src="/static/admin/js/echarts.map-2.js"></script>
+
+</body>
+</html>

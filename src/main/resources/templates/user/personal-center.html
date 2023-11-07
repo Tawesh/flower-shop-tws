@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人信息</title>
+    <link href="/favicon.ico" rel="icon">
+    <link rel="stylesheet" href="/static/public/bootstrap/css/bootstrap.css">
+</head>
+<body>
+
+<div class="container mt-5" id="center">
+    <div class="row">
+        <div class="col-lg-3 col-md-4">
+            <el-tabs :stretch="true" :tab-position="'left'" style="height: 680px;width: 1200px">
+                <el-tab-pane label="账号信息">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">账号信息</h5>
+                            <p class="card-text">用户名: {{uName}}</p>
+                            <p class="card-text">注册账号: {{account}}</p>
+                        </div>
+                    </div>
+                </el-tab-pane>
+                <el-tab-pane label="我的订单">
+                    <el-main>
+                        <div class="card" style="width: 980px">
+                            <div class="card-body">
+                                <div style="display: flex;">
+                                    <h5 class="card-title">订单管理</h5>
+                                    <div class="searchOrder" style="margin-left: 100px;width: 500px;display: flex">
+                                        <el-input></el-input>
+                                        <el-button>查询订单</el-button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <el-table
+                                            :data="tableData.filter(data => !search || data.name.toLowerCase().includes(search.toLowerCase()))"
+                                            style="width: 100%"
+                                            border
+                                    >
+                                        <el-table-column
+                                                fixed
+                                                align="center"
+                                                label="订单编号"
+                                                prop="orderId"
+                                                width="200"
+                                        >
+                                        </el-table-column>
+                                        <el-table-column
+                                                label="日期"
+                                                align="center"
+                                                width="200"
+                                                prop="changeDate">
+                                        </el-table-column>
+                                        <el-table-column
+                                                label="商品名称"
+                                                width="200"
+                                                align="center"
+                                                prop="itemTitle">
+                                        </el-table-column>
+                                        <el-table-column
+                                                label="单价"
+                                                align="center"
+                                                prop="price">
+                                        </el-table-column>
+                                        <el-table-column
+                                                label="数量"
+                                                align="center"
+                                                prop="number">
+                                        </el-table-column>
+                                        <el-table-column
+                                                label="总计"
+                                                align="center"
+                                                prop="total">
+                                        </el-table-column>
+                                        <el-table-column
+                                                label="收货地址"
+                                                align="center"
+                                                width="300"
+                                                prop="address">
+                                        </el-table-column>
+                                        <el-table-column
+                                                label="联系人"
+                                                align="center"
+                                                width="200"
+                                                prop="phone">
+                                        </el-table-column>
+                                        <el-table-column
+                                                width="200"
+                                                align="center"
+                                                label="支付状态"
+                                                prop="payStatus">
+                                            <template slot-scope="scope">
+                                                <el-button type="text" @click="toPay(scope.row.orderId,scope.row.payStatus)">
+                                                    {{scope.row.payStatus === 0 ? '未支付' : '已支付'}}
+                                                </el-button>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column
+                                                label="订单状态"
+                                                width="150"
+                                                align="center"
+                                                prop="orderStatus"
+                                        >
+                                            <template slot-scope="scope">
+                                                <el-tag
+                                                        :type="scope.row.orderStatus === 0 ? 'danger' : 'success'"
+                                                        disable-transitions>
+                                                    {{scope.row.orderStatus === 0 ? "未发货" : (scope.row.orderStatus === 1 ? "已发货" : "已完成")}}
+                                                </el-tag>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column
+                                                label="操作"
+                                                width="100"
+                                                align="center"
+                                        >
+                                            <template slot-scope="scope">
+                                                <el-button @click="handleDelete(scope.$index, scope.row)" type="danger">
+                                                    取消订单
+                                                </el-button>
+                                            </template>
+
+                                        </el-table-column>
+                                    </el-table>
+                                </div>
+                            </div>
+                        </div>
+                    </el-main>
+                </el-tab-pane>
+                <el-tab-pane label="优惠卷">
+                    <el-main>
+                        <div>
+                            <el-empty description="暂无优惠"></el-empty>
+                        </div>
+                    </el-main>
+                </el-tab-pane>
+            </el-tabs>
+        </div>
+
+    </div>
+</div>
+
+<script src="/static/public/js/jquery.main.js"></script>
+<script src="/static/public/bootstrap/js/bootstrap.js"></script>
+
+<link href="/static/public/css/element-ui.css" type="text/css" rel="stylesheet">
+<script src="/static/public/js/vue.js"></script>
+<script src="/static/public/js/axios.js"></script>
+<script src="/static/public/js/element-ui.js"></script>
+<script src="/static/user/js/vue-swal.js"></script>
+
+<script>
+    window.onload = function () {
+        vm.init_data()
+    }
+    const vm = new Vue(
+        {
+            el: "#center",
+            data() {
+                return {
+                    uName: "",
+                    account: "",
+                    createTime: "",
+                    tableData: [],
+                    search: ''
+                }
+            },
+            methods: {
+                init_data() {
+                    this.uName = localStorage.getItem("fs-username")
+                    this.account = localStorage.getItem("fs-account")
+                    axios.post("/web/tws/fs/api/data/order-info?uid=" + this.getUrlParam("uid") + "&tk=" + this.getUrlParam("tk")).then(response => {
+                        this.tableData = response.data.response.data
+                        console.log(response.data.response.data)
+                    }).catch(() => {
+                        this.$message.error("服务异常，请检查连接")
+                    })
+                },
+                handleEdit(index, row) {
+                    console.log(index, row);
+                },
+                handleDelete(index, row) {
+                    console.log(index, row);
+                },
+                filterTag(value, row) {
+                    return row.orderStatus === value;
+                },
+                filterHandler(value, row, column) {
+                    const property = column['property'];
+                    return row[property] === value;
+                },
+                toPay(orderId, payStatus) {
+                    if (payStatus === 1) {
+                        this.$message.warning("该订单已支付")
+                    } else {
+                        if (localStorage.getItem("userToken") !== null) {
+                            this.$prompt("模拟购买：请输入33+66+1的值", "系统提示", {
+                                confirmButtonText: "去支付",
+                                type: "warning",
+                                center: true,
+                                closeOnClickModal: false,
+                                closeOnPressEscape: false
+                            }).then(({value}) => {
+                                if (value === "100") {
+                                    this.rePay(true,1,orderId)
+                                } else {
+                                    this.$swal({
+                                        title: "购买失败!",
+                                        text: "原因：未成功支付!",
+                                        icon: "error",
+                                        button: "好的，我已知晓!",
+                                    })
+                                }
+
+                            }).catch(() => {
+                                this.$message.error("购买失败，用户取消支付")
+                            })
+                        } else {
+                            this.$notify({
+                                title: '警告',
+                                message: '请先登录',
+                                type: 'warning'
+                            });
+                            setTimeout(() => {
+                                window.location = "/user/login-register"
+                            }, 2000)
+                        }
+                    }
+
+                },
+                rePay(isPay, payNum, orderId) {
+                    if (isPay) {
+                        axios.post("/web/tws/fs/api/data/repay", {
+                            "payNum": payNum,
+                            "orderId": orderId
+                        }).then(response => {
+                            if (response.data.code === 0) {
+                                this.$message.success("订单已支付")
+                                this.init_data()
+                            } else {
+                                this.$message.error("支付失败")
+                            }
+                        }).catch(() => {
+                            this.$message.error("系统异常，请稍后再试")
+                        })
+                    }
+                },
+                getUrlParam(params) {
+                    // 获取查询字符串部分
+                    var queryString = window.location.search;
+
+                    // 从查询字符串中获取参数
+                    var urlParams = new URLSearchParams(queryString);
+
+                    // 使用 get() 方法获取特定参数的值
+                    return urlParams.get(params);
+                }
+
+            },
+        }
+    )
+</script>
+</body>
+</html>

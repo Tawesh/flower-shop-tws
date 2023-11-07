@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="/favicon.ico" rel="icon">
+    <title>我的购物车</title>
+    <link rel="stylesheet" href="/static/public/css/element-ui.css">
+    <script src="/static/user/cart/js/jquery.min.js"></script>
+    <script src="/static/public/js/vue.js"></script>
+    <script src="/static/public/js/axios.js"></script>
+    <script src="/static/public/js/element-ui.js"></script>
+    <link rel="stylesheet" href="/static/public/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/public/bootstrap/font/bootstrap-icons.css">
+    <script src="/static/public/js/jquery.main.js"></script>
+    <script src="/static/public/bootstrap/js/bootstrap.js"></script>
+    <script src="/static/user/js/vue-swal.js"></script>
+</head>
+<style>
+    a:hover {
+        text-decoration: none;
+    }
+    tbody tr:hover{
+        background-color: rgba(0, 0, 0, 0.07);
+    }
+</style>
+<body>
+<div id="cart">
+    <div style="position: fixed;width: 100%;z-index: 999;">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03"
+                    aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/">OnlineShop</a>
+
+            <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+                <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/"><i class="bi bi-house"></i>首页<span
+                                class="sr-only">(current)</span></a>
+                    </li>
+                </ul>
+                <h1>
+                    <svg t="1698329202635" class="icon" viewBox="0 0 1076 1024" version="1.1"
+                         xmlns="http://www.w3.org/2000/svg" p-id="4913" width="48" height="48">
+                        <path d="M1050.965 150.528H337.92v75.093h642.73L868.353 525.653H320.171L241.664 0 0 0.341v75.094h177.152l101.035 675.84 660.138-0.342V675.84H342.7l-11.264-75.093h590.848l154.624-400.043M358.4 1024a119.467 119.467 0 1 1 119.467-119.467A119.467 119.467 0 0 1 358.4 1024z m0-170.667a51.2 51.2 0 1 0 51.2 51.2 51.2 51.2 0 0 0-51.2-51.2zM802.133 1024A119.467 119.467 0 1 1 921.6 904.533 119.467 119.467 0 0 1 802.133 1024z m0-170.667a51.2 51.2 0 1 0 51.2 51.2 51.2 51.2 0 0 0-51.2-51.2z"
+                              fill="#1296db" p-id="4914"></path>
+                    </svg>
+                    购物车列表
+                </h1>
+            </div>
+        </nav>
+    </div>
+    <div id="app" style="position: relative;top: 100px">
+        <div style="position: relative;left: 20px">
+            <el-radio v-model="radio" label="0">鲜花</el-radio>
+            <el-radio v-model="radio" label="1">礼品</el-radio>
+        </div>
+        <div style="height: 500px;overflow-y: scroll">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th><input type="checkbox" v-model="selectAll" @change="toggleAll"></th>
+                    <th>商品图片</th>
+                    <th>商品名称</th>
+                    <th>商品单价</th>
+                    <th>下单数量</th>
+                    <th>小计</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="product in radio==='0'?products=flowerProducts:products=giftProducts" :key="product.cartId">
+                    <td><input type="checkbox" v-model="product.selected" @change="updateTotal"></td>
+                    <td><img :src="'http://localhost:5200/images/'+product.itemId+'.jpg_220x240.jpg'" alt="商品图片"
+                             width="50" height="50"></td>
+                    <td>{{ product.itemTitle }}</td>
+                    <td>{{ product.itemPrice }}￥</td>
+                    <td style="display: flex">
+                        <div @click="decrement(product)">
+                            <svg t="1698395088694" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                                 xmlns="http://www.w3.org/2000/svg" p-id="6344" width="20" height="20">
+                                <path d="M863.74455 544.00086 163.424056 544.00086c-17.664722 0-32.00086-14.336138-32.00086-32.00086s14.336138-32.00086 32.00086-32.00086l700.320495 0c17.695686 0 31.99914 14.336138 31.99914 32.00086S881.440237 544.00086 863.74455 544.00086z"
+                                      fill="#575B66" p-id="6345"></path>
+                            </svg>
+                        </div>
+                        <span style="font-size: 18px;font-weight: bold;margin:0 20px">{{
+                                product.buyN < 10 ? '0' + product.buyN : product.buyN
+                            }}</span>
+                        <div @click="increment(product)">
+                            <svg t="1698394960682" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                                 xmlns="http://www.w3.org/2000/svg" p-id="4025" width="20" height="20"
+                                 data-spm-anchor-id="a313x.search_index.0.i5.26c13a81JRtKbG">
+                                <path d="M544.256 480.256h307.2a32.256 32.256 0 0 1 0 64h-307.2v307.2a32.256 32.256 0 0 1-64 0v-307.2h-307.2a32.256 32.256 0 1 1 0-64h307.2v-307.2a32.256 32.256 0 1 1 64 0z"
+                                      fill="#5A5A68" p-id="4026"
+                                      data-spm-anchor-id="a313x.search_index.0.i4.26c13a81JRtKbG"
+                                      class="selected"></path>
+                            </svg>
+                        </div>
+                    </td>
+                    <td style="width: 100px">{{ product.buyN * product.itemPrice }}￥</td>
+                    <td>
+                        <div @click="remove(product)">
+                            <svg t="1698395697752" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                                 xmlns="http://www.w3.org/2000/svg" p-id="7432" width="21" height="21">
+                                <path d="M189.124926 206.817739 834.875074 206.817739C824.056355 206.817739 815.037987 197.278738 815.718488 186.375821L766.845228 969.422054C767.420593 960.203599 774.673955 953.37931 784.03501 953.37931L239.96499 953.37931C249.232543 953.37931 256.586205 960.312638 257.154772 969.422054L208.281512 186.375821C208.961624 197.272664 199.982115 206.817739 189.124926 206.817739ZM186.671228 973.821228C188.422497 1001.879852 211.883661 1024 239.96499 1024L784.03501 1024C811.990051 1024 835.582287 1001.80337 837.328772 973.821228L886.202033 190.774996C888.065218 160.922854 864.68894 136.197049 834.875074 136.197049L189.124926 136.197049C159.269853 136.197049 135.939407 160.996952 137.797967 190.774996L186.671228 973.821228ZM971.034483 206.817739C990.535839 206.817739 1006.344828 191.00875 1006.344828 171.507394 1006.344828 152.00602 990.535839 136.197049 971.034483 136.197049L52.965517 136.197049C33.464161 136.197049 17.655172 152.00602 17.655172 171.507394 17.655172 191.00875 33.464161 206.817739 52.965517 206.817739L971.034483 206.817739ZM358.849148 206.817739 665.150852 206.817739C694.015417 206.817739 717.323123 183.246901 717.323123 154.533323L717.323123 52.284416C717.323123 23.465207 693.830144 0 665.150852 0L358.849148 0C329.984583 0 306.676877 23.570838 306.676877 52.284416L306.676877 154.533323C306.676877 183.352514 330.169856 206.817739 358.849148 206.817739ZM377.297567 52.284416C377.297567 62.397193 369.165877 70.62069 358.849148 70.62069L665.150852 70.62069C654.846093 70.62069 646.702433 62.486652 646.702433 52.284416L646.702433 154.533323C646.702433 144.420529 654.834123 136.197049 665.150852 136.197049L358.849148 136.197049C369.153907 136.197049 377.297567 144.331087 377.297567 154.533323L377.297567 52.284416ZM595.6986 835.467988C595.6986 854.969344 611.507571 870.778333 631.008945 870.778333 650.510301 870.778333 666.319289 854.969344 666.319289 835.467988L666.319289 324.729062C666.319289 305.227705 650.510301 289.418717 631.008945 289.418717 611.507571 289.418717 595.6986 305.227705 595.6986 324.729062L595.6986 835.467988ZM428.3014 324.729062C428.3014 305.227705 412.492429 289.418717 392.991055 289.418717 373.489699 289.418717 357.680711 305.227705 357.680711 324.729062L357.680711 835.467988C357.680711 854.969344 373.489699 870.778333 392.991055 870.778333 412.492429 870.778333 428.3014 854.969344 428.3014 835.467988L428.3014 324.729062Z"
+                                      fill="#389BFF" p-id="7433"></path>
+                            </svg>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <el-empty description="购物车空空如也" v-show="products.length===0"></el-empty>
+        </div>
+        <div style="position: fixed;">
+            <div style="display: grid;grid-template-columns: 1fr 1fr;width: 1000px;position: relative;left: 500px;top: 25px">
+                <p>总计: <span style="color: red;font-size: 20px">{{ totalPrice }}</span>￥</p>
+                <div class="payAll">
+                    <button @click="getOrder" class="btn btn-danger">去结算</button>
+                </div>
+            </div>
+        </div>
+        <el-dialog
+                title="完善收货信息"
+                :visible.sync="visibleDialog"
+                width="500px"
+                center
+        >
+            <div style="margin: auto">
+                <el-form :label-position="'right'" label-width="80px" :model="formInfo">
+                    <el-form-item label="手机号">
+                        <el-input v-model="formInfo.addr"></el-input>
+                    </el-form-item>
+                    <el-form-item label="收货地址">
+                        <el-input v-model="formInfo.phone"></el-input>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <span slot="footer" class="dialog-footer">
+            <el-button @click="cancelPay(0)">还不想买</el-button>
+        <el-button @click="init_order" type="primary">填写无误</el-button>
+        </span>
+        </el-dialog>
+        <el-dialog
+                :visible.sync="showPayImg"
+                title="请支付"
+                center
+                width="400px"
+                :show-close="false"
+                :close-on-click-modal="false"
+                :close-on-press-escape="false"
+        >
+            <div style="position: relative;margin: auto;text-align: center">
+                <div>
+                    <el-statistic
+                            @finish="hilarity"
+                            :value="deadline3"
+                            time-indices
+                            :title="'订单编号:'+orderId"
+
+                    >
+                    </el-statistic>
+                </div>
+                <img src="/static/user/image/wchatPay.jpg" alt="" width="150px" height="auto">
+                <div style="position:relative;top: 5px">
+                    <span>支付金额：{{totalPrice}}￥</span>
+                </div>
+            </div>
+            <span slot="footer" class="dialog-footer">
+            <el-button @click="cancelPay(1)">未支付</el-button>
+        <el-button type="primary" @click="init_Pay">已支付</el-button>
+        </span>
+
+        </el-dialog>
+    </div>
+    <div class="mz-foot"></div>
+    <div style="position: fixed;right: 5%;bottom: 12%" onclick="window.history.back();">
+        <el-tooltip content="回到上一级" effect="light">
+            <svg t="1698335141390" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                 p-id="13024" width="48" height="48">
+                <path d="M512 12.8C236.7488 12.8 12.8 236.7488 12.8 512s223.9488 499.2 499.2 499.2 499.2-223.9488 499.2-499.2a502.1184 502.1184 0 0 0-282.88-449.9968 38.4 38.4 0 1 0-33.28 69.2224A424.96 424.96 0 0 1 934.4 512c0 232.9088-189.4912 422.4-422.4 422.4S89.6 744.9088 89.6 512 279.0912 89.6 512 89.6a38.4 38.4 0 0 0 0-76.8z"
+                      fill="#438CFF" p-id="13025"></path>
+                <path d="M691.456 180.224a38.4 38.4 0 0 0-54.3232 0L332.544 484.864a38.2464 38.2464 0 0 0 0 54.272l304.64 304.64a38.2976 38.2976 0 0 0 54.272 0 38.4 38.4 0 0 0 0-54.3232L414.0032 512l277.4528-277.4528a38.4 38.4 0 0 0 0-54.3232z"
+                      fill="#438CFF" p-id="13026"></path>
+            </svg>
+        </el-tooltip>
+
+    </div>
+
+</div>
+
+
+<script src="/static/user/cart/js/cart.js"></script>
+<script>
+
+</script>
+</body>
+
+</html>

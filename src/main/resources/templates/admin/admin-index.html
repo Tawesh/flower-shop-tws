@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>花维电商后台</title>
+    <link href="/static/public/css/element-ui.css" type="text/css" rel="stylesheet">
+    <script src="/static/public/js/vue.js"></script>
+    <link href="/favicon.ico" rel="icon">
+    <script src="/static/public/js/jquery.main.js"></script>
+    <script src="/static/public/js/axios.js"></script>
+    <script src="/static/public/js/element-ui.js"></script>
+    <link href="/static/admin/css/reset.css" rel="stylesheet"/>
+    <link href="/static/admin/css/iconfont.css" rel="stylesheet"/>
+    <link href="/static/admin/css/index.css" rel="stylesheet"/>
+    <script src="/static/admin/js/f.js"></script>
+</head>
+<body>
+
+
+<div id="admin">
+    <div class="PublicHead clearfix">
+        <div class="leftBox clearfix">
+            <!--<div class="companyLogo">
+                <img src="images/logo.jpg" />
+            </div>-->
+            <!--<i class="iconfont icon-caidan Js_MenuList"></i>-->
+
+            <div class="companyText">
+                花维电商后台管理系统
+            </div>
+        </div>
+        <div class="RightBox clearfix">
+            <div class="UserPhotoBox">
+                <div class="UserPic">
+                    <img src="/static/admin/images/user.jpg"/>
+                </div>
+                <div class="UserName">
+                    管理员
+                </div>
+            </div>
+            <a href="/admin/login">
+                <div class="dropOutBox">
+                    <i class="iconfont icon-app_icons--">
+                    </i>
+                    <span>退出</span>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="PublicDownWhole clearfix">
+        <!--左侧-->
+        <div class="leftBox Js_leftBox">
+            <ul>
+                <li class="li-button-0" @click="changeUrl(0)"><i class="iconfont Select icon-yonghuguanli"></i><span>网站信息</span>
+                </li>
+                <li class="li-button-1" @click="changeUrl(1)"><i class="iconfont Select icon-yonghuguanli"></i><span>用户管理</span>
+                </li>
+                <li class="li-button-2" @click="changeUrl(2)"><i
+                        class="iconfont icon-tubiao_dingdan"></i><span>订单管理</span></li>
+                <li class="li-button-3" @click="changeUrl(3)"><i
+                        class="iconfont icon-weibiaoti1"></i><span>产品管理</span></li>
+                <li class="li-button-4" @click="returnHome"><i
+                        class="iconfont icon-weibiaoti1"></i><span>回到首页</span></li>
+            </ul>
+        </div>
+        <!--右侧-->
+        <div style="position: absolute;left: 250px;top: 65px">
+            <iframe :src="pageUrl" width="1250" height="670" style="border: none"></iframe>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        new Vue({
+            el: "#admin",
+            data() {
+                return {
+                    pageUrl: 'websiteInfo',
+                    pageList: ['websiteInfo', 'userManage', 'orderManage', 'productManage']
+                }
+            },
+            methods: {
+                changeUrl(index) {
+                    this.pageUrl = this.pageList[index]
+                },
+                returnHome() {
+                    window.location.href = "/"
+                }
+            }
+        })
+    })
+
+</script>
+</body>
+</html>
