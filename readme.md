@@ -19,9 +19,6 @@
    		 root   E:\fs-upload;
    		 index  index.html index.htm;
    	  }
-   	  location /videos/ {
-   		 root   E:\sex-video;
-   	  }
    }
    ```
 
